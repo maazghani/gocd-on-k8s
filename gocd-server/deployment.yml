@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: gocd-server
+  labels:
+    app: gocd
+    component: server
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gocd
+        component: server
+    spec:
+      containers:
+      - name: gocd-server
+        image: "maazghani/gocd-server:v1"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8153
+        - name: https
+          containerPort: 8154
+        resources:
+          limits:
+            cpu: 200m
+            memory: 2048Mi
+          requests:
+            cpu: 200m
+            memory: 2048Mi
+        volumeMounts:
+        - name: godata
+          mountPath: /var/lib/go-server
+        - name: goetc
+          mountPath: /etc/go
+      volumes:
+      - name: godata
+        persistentVolumeClaim:
+          claimName: gocd-godata
+      - name: goetc
+        persistentVolumeClaim:
+          claimName: gocd-goetc

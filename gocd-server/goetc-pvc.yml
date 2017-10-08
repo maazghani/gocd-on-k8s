@@ -1,0 +1,14 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: gocd-goetc
+  labels:
+    app: gocd
+    component: server
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  storageClassName: default
+  resources:
+    requests:
+      storage: "8Gi"

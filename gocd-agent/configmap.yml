@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gocd-agent-autoregister
+  labels:
+    app: gocd
+    component: agent
+data:
+  autoregister.properties: |-
+    agent.auto.register.key=autoregister
