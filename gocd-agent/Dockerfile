@@ -1,4 +1,4 @@
-FROM quay.io/nordstrom/java:8
+FROM oracle/openjdk:8
 MAINTAINER maazghani@gmail.com
 
 USER root
