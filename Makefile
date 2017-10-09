@@ -14,4 +14,5 @@ release: build
 	docker push ${DOCKER_REPO}gocd-agent:${VERSION}
 
 test: build
-	test
+	exec test
+
