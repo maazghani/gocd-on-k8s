@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# colorz
+black() { echo "$(tput setaf 0)$*$(tput setaf 9)"; }
+red() { echo "$(tput setaf 1)$*$(tput setaf 9)"; }
+green() { echo "$(tput setaf 2)$*$(tput setaf 9)"; }
+yellow() { echo "$(tput setaf 3)$*$(tput setaf 9)"; }
+blue() { echo "$(tput setaf 4)$*$(tput setaf 9)"; }
+magenta() { echo "$(tput setaf 5)$*$(tput setaf 9)"; }
+cyan() { echo "$(tput setaf 6)$*$(tput setaf 9)"; }
+white() { echo "$(tput setaf 7)$*$(tput setaf 9)"; }
+
+pass() {
+  COUNTER_OK=$((COUNTER_OK+1))
+  COUNTER=$((COUNTER+1))
+  green "pass $COUNTER $scenario"
+}
+
+fail() {
+  COUNTER=$((COUNTER+1))
+  red "fail $COUNTER $scenario"
+}
+
+start_services() {
+docker network create -d bridge gocd 
+docker run ${DOCKER_REPO}gocd-server:${VERSION} --network gocd --hostname gocd-server
+docker run ${DOCKER_REPO}gocd-agent:${VERSION} --network gocd --hostname gocd-agent
+}
+
+stop_services() {
+docker stop ${DOCKER_REPO}gocd-server:${VERSION} 
+docker stop ${DOCKER_REPO}gocd-agent:${VERSION}
+docker network rm gocd
+}
+
+COUNTER=0
+COUNTER_OK=0
+
+start_services
+
+scenario="GoCD server is running"
+docker exec -it gocd-server curl -o /dev/null --silent -L --insecure https://localhost:8154
+status=$?
+[ $status -eq 0 ] && pass || fail
+
+scenario="GoCD server agentAutoRegisterKey is defined"
+docker exec -it gocd-server cat /var/lib/go-server/config/gocd-server-config.xml  | grep "agentAutoRegisterKey=\"autoregisterkey\"" >/dev/null
+status=$?
+[ $status -eq 0 ] && pass || fail
+
+scenario="GoCD autoregister.properties file is present"
+docker exec -it gocd-server curl -o /dev/null --silent -L --insecure 'https://localhost:8154/go/api/backups' \
+        -H 'Confirm: true' \
+        -H 'Accept: application/vnd.go.cd.v1+json' \
+        -X POST
+status=$?
+[ $status -eq 0 ] && pass || fail
+
+stop_services
+
+cyan "tests $COUNTER_OK of $COUNTER passed"

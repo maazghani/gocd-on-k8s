@@ -1,4 +1,4 @@
-.PHONY: build release
+.PHONY: build release test
 
 DOCKER_REPO=maazghani/
 VERSION=$(shell git rev-parse --short HEAD)
@@ -9,6 +9,10 @@ build:
 
 release: build
 	VERSION=$(git rev-parse --short HEAD)
-	#docker login
+	docker login
 	docker push ${DOCKER_REPO}gocd-server:${VERSION}
 	docker push ${DOCKER_REPO}gocd-agent:${VERSION}
+
+test: build
+	sh test
+

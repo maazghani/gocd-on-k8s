@@ -3,7 +3,13 @@
 make build
 ```
 
-### Build and push docker images to container registry
+### Build and test 
+```
+make test
+```
+
+### Build, test and push docker images to container registry
 ```
 make release
 ```
+
